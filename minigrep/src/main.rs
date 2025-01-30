@@ -1,6 +1,7 @@
-use core::panic;
 use std::env;
 use std::fs;
+use std::process;
+
 
 struct Config {
     query: String,
@@ -11,7 +12,7 @@ impl Config {
 
     fn build(args: &[String]) -> Result<Config, &'static str> {
         if args.len() < 3 {
-            panic!("Not enough input arguments")
+            return Err("not enough input arguments")
         }
 
         let query = args[1].clone();
@@ -26,12 +27,10 @@ impl Config {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let config = Config::build(&args);
-
-    let config = match config {
-        Ok(config) => config,
-        Err(error) => panic!("Config not valid: {error:?}")
-    };
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
 
     println!("Searching for {0}", config.query);
     println!("In file {0}", config.file_path);
